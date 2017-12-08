@@ -69,3 +69,4 @@ The position on the lane is calculated from the 'destination' points used for wa
 The pipeline works well on the project video. There are some issues on the regions where there are a lot of shadows, which mostly affect the lane curvature, but not the general area of the lanes. This could be fixed by calculating the distance between the lanes from good previous frames. Then, in image slices where the lane distance is unusually large or small, this lane distance can be used to calculate a virtual location of the lane. For example, it the left lane is very visible but the right lane is impossible to detect, we could use the curvature of the left lane and the lane width information from the previous frames to estimate the location of the right lane. The final video can be found in `project_video_output.mp4`.
 
 
+I will try the challenge videos, but for now the priority was to finish Term1 before the deadline. 
