@@ -23,7 +23,7 @@ The goals / steps of this project are the following:
 
 ### Camera Calibration
 
-I calibrated the camera using the chessboard images provided. First, knowing the size of the chessboard (9x5), the object points were created, which are all the same. Since the object lays on a flat surface, the z coordinate is 0. I used the `findChessboardCorners` function to find the location of the chessboard points on each chessboard image. After obtaining complete object and image points vectors, I used the `calibrateCamera` method to obtain the mtx, dist(ances) variables require for the `undistortCamera` function. These values were saved using Pickle a file called `calib_data`, so that they can be reused later without the need to recompute the calibration values. An example of an undistorted image is shown below.
+I calibrated the camera using the chessboard images provided. First, knowing the size of the chessboard (9x6), the object points were created, which are all the same. Since the object lays on a flat surface, the z coordinate is 0. I used the `findChessboardCorners` function to find the location of the chessboard points on each chessboard image. After obtaining complete object and image points vectors, I used the `calibrateCamera` method to obtain the mtx, dist(ances) variables require for the `undistortCamera` function. These values were saved using Pickle a file called `calib_data`, so that they can be reused later without the need to recompute the calibration values. An example of an undistorted image is shown below.
 
 ![alt text][image1]
 
