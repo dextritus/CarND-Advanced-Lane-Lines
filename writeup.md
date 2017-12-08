@@ -46,7 +46,9 @@ Image is converted to grayscale, and to HSL. The sobel operator is applied in bo
 
 ![alt text][image3]
 
-In order to obtain a bird's eye view of the road, sample points were obtained on a test image (sorce points), and mapped onto a destination image of size (1200,720). The method An example of the warped road image is given below.
+In order to obtain a bird's eye view of the road, sample points were obtained on a test image (source points), and mapped onto a destination image of size (1200,720). The method is called `warp_image`. An example of the warped road image is given below.
+
+
 
 ![alt text][image2]
 
