@@ -13,7 +13,7 @@ crop_y = 300 #where to crop the image from
 window_width = 50	# sliding window width for convolution
 window_height = 100 # window slice height for convolution
 margin = 40 #+- to the right and the left, in case the lane changes orientation
-dy = 100
+dy = 80 # by how much to move the sliding window
 
 n_prev = 30
 prev_window_left = np.array([]).reshape(0, 3)
@@ -21,9 +21,9 @@ prev_window_right = np.array([]).reshape(0, 3)
 prev_l_radius = np.array([])
 prev_r_radius = np.array([])
 
-images = glob.glob('./camera_cal/calibration*.jpg')
-test_file = './camera_cal/calibration5.jpg'
-test_img = mpimg.imread(test_file)
+# images = glob.glob('./camera_cal/calibration*.jpg')
+# test_file = './camera_cal/calibration5.jpg'
+# test_img = mpimg.imread(test_file)
 
 
 ######################################
@@ -77,17 +77,6 @@ def undistort_camera(img):
 
 	return cv2.undistort(img, mtx, dist, None, mtx)
 
-# plt.figure()
-# plt.subplot(121)
-# plt.imshow(test_img)
-# plt.title('distorted test image')
-# # plt.savefig('./output_images/test_before.png')
-# plt.subplot(122)
-# plt.imshow(test_undistorted)
-# plt.title('undistorted test image')
-# plt.savefig('./output_images/test_both.png')
-# plt.show()
-
 #############################
 # transform the perspective
 #############################
@@ -109,32 +98,6 @@ def warp_image(img, crop_y):
 					]);
 	M = cv2.getPerspectiveTransform(src, dst)
 	return cv2.warpPerspective(img, M, (1280, 720), flags = cv2.INTER_CUBIC)
-
-
-# cv2.imwrite('straight_lines1_undist.jpg', road_img_undist)
-
-road_file = './test_images/straight_lines1.jpg'
-road_img = mpimg.imread(road_file)
-road_img = crop_img(road_img, crop_y)
-road_img_undist = undistort_camera(road_img)
-
-#undistort the road imatge
-road_img_warped = warp_image(road_img, crop_y)
-
-# plt.figure()
-# plt.subplot(121)
-# plt.imshow(road_img_undist, origin = 'upper')
-# plt.plot(280, 661 - crop_y, 'r.')
-# plt.plot(586, 455 - crop_y, 'r.')
-# plt.plot(698, 455 - crop_y, 'r.')
-# plt.plot(1030, 661 - crop_y, 'r.')
-# plt.title("undistorted road image")
-# plt.subplot(122)
-# plt.imshow(road_img_warped, origin = 'upper')
-# plt.title("warped, undistorted road image")
-# plt.savefig('./output_images/undistorted_perspective.png')
-
-# plt.show()
 
 ###########################################
 # apply color filter, gradient thresholds
@@ -169,38 +132,10 @@ def color_edges(image):
 	binary_sobel = np.zeros_like(tot_sobel)
 	binary_sobel[(tot_sobel > sobel_min) & (tot_sobel<sobel_max) & (abs_grad_dir >= np.pi/3) & (abs_grad_dir<=np.pi/2)] = 1
 
-	## gradient direction threshold
-
-	## together, color + gradient
-	# color_binary = np.dstack(( np.zeros_like(binary_sobel), binary_sobel, s_binary)) * 255
-
 	together_binary = np.zeros_like(tot_sobel)
 	together_binary[(binary_sobel == 1) | (s_binary == 1)] = 1
 
 	return together_binary
-
-# plt.figure()
-# plt.subplot(121)
-# plt.imshow(test_img, origin = 'upper')
-# plt.title("orig")
-# plt.subplot(122)
-# plt.imshow(color_binary, origin = 'upper') #, cmap = 'gray')
-# plt.title("color and gradient thresholds")
-# # plt.savefig('./output_images/original_together_color.png')
-# plt.show()
-
-# together_binary = undistort_camera(together_binary)
-# together_binary = warp_image(together_binary, crop_y)
-
-# plt.figure()
-# plt.imshow(together_binary, origin = 'upper', cmap = 'gray')
-# plt.title("final warped")
-# plt.show()
-
-# warped = together_binary
-
-
-# print(together_binary.shape)
 
 
 ################################
@@ -391,18 +326,6 @@ def radius_of_curvature(ploty, left_fitx, right_fitx):
 	left_R = np.floor(left_R)
 	right_R = np.floor(right_R)
 
-	# prev_l_radius = np.hstack([prev_l_radius, left_R])
-	# prev_r_radius = np.hstack([prev_r_radius, right_R])
-
-	# prev_l_radius = prev_l_radius[-10:]
-	# prev_r_radius = prev_r_radius[-10:]
-
-	# # left_R = best_radius(prev_l_radius)
-	# # right_R = best_radius(prev_r_radius)
-
-	# left_R = np.mean(prev_l_radius)
-	# right_R = np.mean(prev_r_radius)
-
 	return left_R, right_R
 
 
@@ -481,60 +404,14 @@ def pipeline(img):
 	#6. draw everything on original image
 	result = display_lane_info(img_orig, ploty, left_fitx, right_fitx)
 	return result
-#7. radius of curvature
-# l_R, r_R = radius_of_curvature(ploty, left_fitx, right_fitx)
-
-# print("left radius: ", l_R)
-# print("right radius: ", r_R)
 
 #process the movie
-from moviepy.editor import VideoFileClip
+# from moviepy.editor import VideoFileClip
 
-fname = "project_video"
-output = fname + "_output.mp4"
-input_file = VideoFileClip(fname + ".mp4")
-cut_file = input_file#.subclip(35, 44)
-processed_file = cut_file.fl_image(pipeline)
-processed_file.write_videofile(output, audio = False)
+# fname = "project_video"
+# output = fname + "_output.mp4"
+# input_file = VideoFileClip(fname + ".mp4")
+# cut_file = input_file#.subclip(35, 44)
+# processed_file = cut_file.fl_image(pipeline)
+# processed_file.write_videofile(output, audio = False)
 
-# print()
-# a = (hst[1, max_hist] + hst[1, max_hist + 1])/2.0
-
-# img = input_file.get_frame(10)
-# img_orig = img
-# img = crop_img(img, crop_y)
-# #2. color and gradient thersholds
-# thresholded = color_edges(img)
-# #3. undistort, warp
-# thresholded = undistort_camera(thresholded)
-# thresholded = warp_image(thresholded, crop_y)
-# #4. find lanes
-# window_centroids, w_app = find_window_centroids(thresholded, window_width, window_height, margin)
-# #5. obtain polynomial
-# #! add check too see if it is drastically different than previos one
-# # print(w_app)
-# ploty, left_fitx, right_fitx = interpolate_lanes(w_app)
-# lr, rr = radius_of_curvature(ploty, left_fitx, right_fitx)
-
-# found_lanes = draw_lane_region(window_centroids, thresholded)
-
-# plt.figure()
-# # plt.subplot(121)
-# plt.imshow(found_lanes, origin = 'upper')
-# plt.plot(right_fitx, ploty, 'r')
-# plt.plot(left_fitx, ploty, 'r')
-# plt.savefig('./output_images/binary_lane.png')
-# plt.figure()
-# plt.imshow(display_lane_info(img_orig, ploty, left_fitx, right_fitx), origin = 'upper')
-# plt.savefig('./output_images/detected_lane.png')
-# plt.show()
-
-# print(lr, rr)
-
-# plt.figure()
-# plt.subplot(121)
-# plt.imshow(draw_lane_region(window_centroids, thresholded), origin = 'upper')
-# plt.subplot(122)
-# plt.imshow(result, origin = 'upper')
-# plt.savefig('./output_images/detected_lane.png')
-# plt.show()
