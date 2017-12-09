@@ -21,48 +21,45 @@ prev_window_right = np.array([]).reshape(0, 3)
 prev_l_radius = np.array([])
 prev_r_radius = np.array([])
 
-# images = glob.glob('./camera_cal/calibration*.jpg')
-# test_file = './camera_cal/calibration5.jpg'
-# test_img = mpimg.imread(test_file)
-
+images = glob.glob('./camera_cal/calibration*.jpg')
 
 ######################################
 ### generate and save calibration data
-# nx = 9
-# ny = 5
+nx = 9
+ny = 6
 
-# objpts = []
-# imgpts = []
+objpts = []
+imgpts = []
 
-# objp = np.zeros((nx*ny, 3), np.float32)
-# objp[:,:2] = np.mgrid[0:nx, 0:ny].T.reshape(-1, 2)
+objp = np.zeros((nx*ny, 3), np.float32)
+objp[:,:2] = np.mgrid[0:nx, 0:ny].T.reshape(-1, 2)
 
 
-# for img_file in images:
-# 	### calibrate the camera in this section
-# 	img = mpimg.imread(img_file)
+for img_file in images:
+	### calibrate the camera in this section
+	img = mpimg.imread(img_file)
 
-# 	gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-# 	ret, corners = cv2.findChessboardCorners(gray, (nx, ny), None)
+	gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+	ret, corners = cv2.findChessboardCorners(gray, (nx, ny), None)
 
-# 	if ret == True:
-# 		imgpts.append(corners)
-# 		objpts.append(objp)
+	if ret == True:
+		imgpts.append(corners)
+		objpts.append(objp)
 
-# calib_data = {}
-# calib_file = "calib_data"
-# calib_file = open(calib_file, 'wb')
+calib_data = {}
+calib_file = "calib_data"
+calib_file = open(calib_file, 'wb')
 
-# ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpts, imgpts, gray.shape[::-1], None, None)
+ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpts, imgpts, (1280, 720), None, None)
 
-# calib_data["mtx"] = mtx
-# calib_data["dist"] = dist
-# pickle.dump(calib_data, calib_file)
-# calib_file.close()
-########################
+calib_data["mtx"] = mtx
+calib_data["dist"] = dist
+pickle.dump(calib_data, calib_file)
+calib_file.close()
 
-########################
-### load the pickled camera data and undistort
+##############################################
+# load the pickled camera data and undistort
+##############################################
 
 def crop_img(img, crop_y):
 	return img[crop_y:, :, :]
@@ -83,10 +80,10 @@ def undistort_camera(img):
 def warp_image(img, crop_y):
 	#points on the real road
 	src = np.float32([
-					[280, 661 - crop_y],
+					[285, 661 - crop_y],
 					[586, 455 -  crop_y],
 					[698, 455 - crop_y],
-					[1030, 661 - crop_y]
+					[1015, 661 - crop_y]
 					]);
 
 	#points on the undistorted image
@@ -97,7 +94,7 @@ def warp_image(img, crop_y):
 					[900, 720]
 					]);
 	M = cv2.getPerspectiveTransform(src, dst)
-	return cv2.warpPerspective(img, M, (1280, 720), flags = cv2.INTER_CUBIC)
+	return cv2.warpPerspective(img, M, (1280, 720), flags = cv2.INTER_LINEAR)
 
 ###########################################
 # apply color filter, gradient thresholds
@@ -347,10 +344,10 @@ def display_lane_info(orig_image, plty, left_fitx, right_fitx):
 
 	#points on original image
 	src = np.float32([
-					[280, 661],
+					[285, 661],
 					[586, 455],
 					[698, 455],
-					[1030, 661]
+					[1015, 661]
 					]);
 
 	#points on the undistorted image
@@ -389,11 +386,12 @@ def display_lane_info(orig_image, plty, left_fitx, right_fitx):
 def pipeline(img):
 	#1. crop the image
 	img_orig = img
-	img = crop_img(img, crop_y)
+	img_undistorted = undistort_camera(img)
+	img_cropped = crop_img(img_undistorted, crop_y)
 	#2. color and gradient thersholds
-	thresholded = color_edges(img)
+	thresholded = color_edges(img_cropped)
 	#3. undistort, warp
-	thresholded = undistort_camera(thresholded)
+	# thresholded = undistort_camera(thresholded)
 	thresholded = warp_image(thresholded, crop_y)
 	#4. find lanes
 	window_centroids, wapp = find_window_centroids(thresholded, window_width, window_height, margin)
@@ -402,10 +400,31 @@ def pipeline(img):
 	ploty, left_fitx, right_fitx = interpolate_lanes(wapp)
 	# lr, rr = radius_of_curvature(ploty, left_fitx, right_fitx)
 	#6. draw everything on original image
-	result = display_lane_info(img_orig, ploty, left_fitx, right_fitx)
+	result = display_lane_info(img_undistorted, ploty, left_fitx, right_fitx)
 	return result
 
-#process the movie
+# test_file = './test_images/straight_lines1.jpg'
+# img = mpimg.imread(test_file)
+# undist = undistort_camera(img)
+# undist_cropped = crop_img(undist, crop_y)
+# cropped_img = crop_img(img, crop_y)
+# undist_cropped = undistort_camera(cropped_img)
+
+# plt.figure()
+# plt.subplot(121)
+# plt.imshow(undist, origin = 'upper')
+# plt.plot(285, 661, 'r.')
+# plt.plot(586, 455, 'r.')
+# plt.plot(698, 455, 'r.')
+# plt.plot(1015, 661, 'r.')
+# plt.title('undistorted')
+# plt.subplot(122)
+# plt.imshow(warp_image(undist, 0),  origin = 'upper')
+# plt.savefig('./output_images/undistorted_perspective.png')
+# plt.title('undistorted, warped')
+# plt.show()
+
+# #process the movie
 # from moviepy.editor import VideoFileClip
 
 # fname = "project_video"
