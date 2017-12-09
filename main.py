@@ -419,8 +419,8 @@ def pipeline(img):
 # plt.title('undistorted')
 # plt.subplot(122)
 # plt.imshow(warp_image(undist, 0),  origin = 'upper')
-# plt.savefig('./output_images/undistorted_perspective.png')
 # plt.title('undistorted, warped')
+# plt.savefig('./output_images/undistorted_perspective.png')
 # plt.show()
 
 # #process the movie
