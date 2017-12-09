@@ -429,7 +429,13 @@ def pipeline(img):
 # fname = "project_video"
 # output = fname + "_output.mp4"
 # input_file = VideoFileClip(fname + ".mp4")
-# cut_file = input_file#.subclip(35, 44)
+# cut_file = input_file.subclip(35, 44)
+# cut_file = input_file.get_frame(30)
 # processed_file = cut_file.fl_image(pipeline)
 # processed_file.write_videofile(output, audio = False)
+# result = pipeline(cut_file)
 
+# plt.figure()
+# plt.imshow(result, origin = 'upper')
+# plt.savefig('./output_images/detected_lane.png')
+# plt.show()
