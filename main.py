@@ -384,13 +384,12 @@ def display_lane_info(orig_image, plty, left_fitx, right_fitx):
 #######################
 
 def pipeline(img):
-	#1. crop the image
-	img_orig = img
+	#1. undistort, crop the image
 	img_undistorted = undistort_camera(img)
 	img_cropped = crop_img(img_undistorted, crop_y)
 	#2. color and gradient thersholds
 	thresholded = color_edges(img_cropped)
-	#3. undistort, warp
+	#3. warp
 	# thresholded = undistort_camera(thresholded)
 	thresholded = warp_image(thresholded, crop_y)
 	#4. find lanes

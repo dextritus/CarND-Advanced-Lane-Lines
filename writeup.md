@@ -31,16 +31,17 @@ I calibrated the camera using the chessboard images provided. First, knowing the
 
 The pipeline consisted of the following steps, and is found in the method `pipeline`.
 
+* Undistort the image
 * Crop the image
 * Convert the image to grayscale (for the edge detection) and HSL space
 * Use gradient magnitude and direction thersholds, together with color threhsold. 
-* Undistort, and warp the image to obtain a bird's eye view
+* Warp the image to obtain a bird's eye view
 * Identify the region of the lanes from a thresholded binary image
 * Obtain second order polynomials for the lanes, calculate curvature and position on the lane
 * Create a polygon from the lanes, warp back the image onto the original image and display curvature and lane position information.
 * Hope for the best
 
-First the top 300 pixels of the image are removed since they do not contain any useful information. This happens in the `crop_img` method. 
+First the image is undistorted (`undistort_camera` method), and then the top 300 pixels of the image are removed since they do not contain any useful information. This happens in the `crop_img` method. 
 
 Image is converted to grayscale, and to HSL. The sobel operator is applied in both directions with a kernel size of 11. The threshold for the magnitude of the gradient is set between 60 and 150, and for the direction between pi/3 and pi/2 (between 60 and 90 degrees in absolute value). For the color thresholding, only the S channel was considered and the threshold values were between 140 and 190 (otherwise there are too many shadows visible). A binary image was created from the combined edge and color thresholds. This all happens in the `color_edges` method. An example is shown below.
 
